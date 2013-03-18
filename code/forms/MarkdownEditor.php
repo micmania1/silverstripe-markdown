@@ -57,15 +57,12 @@ class MarkdownEditor extends TextareaField {
      * @return {string} HTML to be used
      */
     public function FieldHolder($properties=array()) {
-        $this->extraClasses['stacked']='stacked';
+        $this->extraClasses['stacked'] = 'stacked';
 
         Requirements::css(MARKDOWN_MODULE_BASE.'/css/MarkdownEditor.css');
 
         Requirements::javascript(MARKDOWN_MODULE_BASE.'/javascript/external/ace/ace.js');
         Requirements::javascript(MARKDOWN_MODULE_BASE.'/javascript/external/ace/mode-markdown.js');
-
-        // Fallback theme
-        Requirements::javascript(MARKDOWN_MODULE_BASE.'/javascript/external/ace/theme-twilight.js');
 
         $vars = array(
             "Theme" => "'" . $this->getTheme() . "'"
@@ -86,6 +83,14 @@ class MarkdownEditor extends TextareaField {
                     'style'=>'width: 97%; max-width: 100%; height: '.($this->rows * 16).'px; resize: none;', // prevents horizontal scrollbars
                 )
         );
+    }
+
+    public function performReadonlyTransformation()
+    {
+        $field = parent::performReadonlyTransformation();
+        $field->dontEscape = true;
+        $field->setValue(nl2br(Convert::raw2xml($field->value)));
+        return $field;
     }
 }
 ?>

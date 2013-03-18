@@ -4,13 +4,13 @@ class Markdown extends Text {
                             'AsHTML'=>'HTMLText',
                             'Markdown'=>'Text'
                         );
-    
-    
+
+
     protected static $useGFM=false;
     protected $parsedHTML=false;
     public static $escape_type='xml';
-    
-    
+
+
     /**
      * Checks cache to see if the contents of this field have already been loaded from github, if they haven't then a request is made to the github api to render the markdown
      * @param {bool} $useGFM Use Github Flavored Markdown or render using plain markdown defaults to false just like how readme files are rendered on github
@@ -21,37 +21,37 @@ class Markdown extends Text {
         if($this->parsedHTML!==false) {
             return $this->parsedHTML;
         }
-        
-        
+
+
         if($useGFM==false) {
             $useGFM=self::$useGFM;
         }
-        
+
         //Init cache stuff
         $cacheKey=md5('Markdown_'.$this->tableName.'_'.$this->name.':'.$this->value);
         $cache=SS_Cache::factory('Markdown');
         $cachedHTML=$cache->load($cacheKey);
-        
+
         //Check cache, if it's good use it instead
         if($cachedHTML!==false) {
             $this->parsedHTML=$cachedHTML;
             return $this->parsedHTML;
         }
-        
-        
+
+
         //If empty save time by not calling github's api
         if(empty($this->value)) {
             return $this->value;
         }
-        
-        
+
+
         //Build object to send
         $sendObj=new stdClass();
         $sendObj->text=$this->value;
         $sendObj->mode=($useGFM ? 'gmf':'markdown');
         $content=json_encode($sendObj);
-        
-        
+
+
         //Build curl request to github's api
         $curl=curl_init('https://api.github.com/markdown');
         curl_setopt($curl, CURLOPT_HEADER, false);
@@ -60,31 +60,31 @@ class Markdown extends Text {
         curl_setopt($curl, CURLOPT_POST, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        
-        
+
+
         //Send request and verify response
         $response=curl_exec($curl);
         $status=curl_getinfo($curl, CURLINFO_HTTP_CODE);
         if($status!=200) {
             user_error("Error: Call to api.github.com failed with status $status, response $response, curl_error ".curl_error($curl).", curl_errno ".curl_errno($curl), E_USER_WARNING);
         }
-        
+
         //Close curl connection
         curl_close($curl);
-        
-        
+
+
         //Store response in memory
         $this->parsedHTML=$response;
-        
+
         //Cache response to file system
         $cache->save($this->parsedHTML, $cacheKey);
-        
-        
+
+
         //Return response
         return $this->parsedHTML;
     }
-    
-    
+
+
     /**
      * Renders the field used in the template
      * @return {string} HTML to be used in the template
@@ -94,7 +94,7 @@ class Markdown extends Text {
     public function forTemplate() {
         return $this->AsHTML();
     }
-    
+
     /**
      * Globally enable or disable github flavored markdown
      * @param {bool} $val Boolean true to enable false otherwise
@@ -103,7 +103,7 @@ class Markdown extends Text {
     public static function setUseGFM($value) {
         self::$useGFM=$value;
     }
-    
+
     /**
      * Gets if github flavored markdown is enabled or not globally
      * @return {bool} Returns boolean true if github flavored markdown is enabled false otherwise

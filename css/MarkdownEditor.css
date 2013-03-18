@@ -5,7 +5,7 @@
 .markdowneditor .markdowneditor_editor {
     position: relative;
     font-family: Monaco, "Liberation Mono", Courier, monospace;
-    
+
     z-index: 0;
 }
 

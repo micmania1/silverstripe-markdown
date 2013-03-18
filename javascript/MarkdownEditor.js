@@ -27,6 +27,7 @@
                 editor.resize();
                 div.removeClass('ace_dark');
                 $(this).setEditor(editor);
+                editor.setReadOnly($(this).hasClass("readonly"));
 
                 var code=$(this).val();
                 $(this).setUseSoftTabs($(this).usesSoftTabs(code));
